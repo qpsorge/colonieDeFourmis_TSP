@@ -3,9 +3,10 @@
 ### How to setup :
 ##### 1 : install dependencies
 > pip install -r requirement.txt
-##### 2 : Launch main.py (choose to put verbose=True ou verbose=False to have printed execution)
+##### 2 : Launch main.py (choose to put verbose=True or verbose=False to have printed execution)
 > python main.py
-##### Else : execute cells of global_notebook_colab.ipynb (not up to date)
+##### Else : execute cells of global_notebook_colab.ipynb (for the graphical version upload it to colab to test it)
+###### A améliorer : add graphical version using pygame without colab requirement
 
 ### Présentation de cette solution au problème TSP
 Basée sur les systèmes multi agents, et notamment sur les colonies de fourmis.

@@ -55,6 +55,9 @@ class Map:
       im = ax.imshow(data, cmap=plt.get_cmap('hot'), interpolation='nearest',
                         vmin=np.min(data), vmax=np.max(data))
       fig.colorbar(im)
+      plt.title("Normalized adjacence matrix with pheromone's intensity")
+      plt.xlabel("City nodes")
+      plt.ylabel("City nodes")
       plt.show()
       # Path & length
       print(self.path_from_adj_mat())

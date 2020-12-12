@@ -6,13 +6,16 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import random
+# graphical version
 import pygame
+import cv2
+import time
 
 # Retrieve data 
 (_CITIES, (_CITIES_N,mean_x,mean_y,std_x,std_y), _NODES, epsilon, gamma) = get_data()
 
 # Config for execution of main.py
-graphic = False
+graphic = False 
 N_CIRCUIT = 20
 N_FOURMIS = 20
 df_res = pd.DataFrame()
@@ -80,3 +83,114 @@ if not(graphic):
                 #plt.show()
                 #plt.savefig(f"AnalyseStatistique/{nb_trial}_boxplot_p{pheromone_impact*100}_d{distance_impact*100}.png")
 
+else : #Graphic version yet to be fixed (just drop from colab notebook)
+    pygame.init()
+
+    WIDTH=700
+    HEIGHT=700
+    OFFSET=WIDTH/2
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    done = False
+    is_blue = True
+    x = 0
+    y = 0
+    epsilon=1
+
+    font=pygame.font.Font(None, 24)
+    city_color = (255, 100, 0)
+    ant_color  = (0,255,100)
+    __circuit__ = []
+
+    def text_objects(text, font):
+        textSurface = font.render(text, True, (255,255,255))
+        return textSurface, textSurface.get_rect()
+
+    def message_display(text, coord):
+        largeText = pygame.font.Font(None, 24)
+        TextSurf, TextRect = text_objects(text, largeText)
+        TextRect.center = coord
+        screen.blit(TextSurf, TextRect)
+        pygame.display.update()
+
+    def draw_map():
+        # Center point
+        pygame.draw.rect(screen, (255,255,255), pygame.Rect(OFFSET,OFFSET,1,1))
+                
+        # Draw every city position and text it
+        coord_text=[]
+        for i in range(len(_CITIES_N)):
+            city=_CITIES_N[i]
+            x_coord = OFFSET+(int)((OFFSET-200)*city[0])
+            y_coord = OFFSET+(int)((OFFSET-200)*city[1])
+            coord_text.append((x_coord, y_coord))
+            pygame.draw.rect( screen, city_color, pygame.Rect(x_coord,y_coord, 16,16) )
+            __circuit__.append((x_coord,y_coord))
+        return coord_text
+
+    def display_and_clear(n, end_turn=False):
+        # DISPLAY
+        pygame.display.flip()
+
+        #convert image so it can be displayed in OpenCV
+        view = pygame.surfarray.array3d(screen)
+        #  convert from (width, height, channel) to (height, width, channel)
+        view = view.transpose([1, 0, 2])
+        #  convert from rgb to bgr
+        img_bgr = cv2.cvtColor(view, cv2.COLOR_RGB2BGR)
+        #Display image, clear cell every 0.5 seconds
+        #cv2.imshow("img",img_bgr)
+
+        coord_text = draw_map()
+        for i in range(len(coord_text)):
+            message_display(_CITIES[i][0], coord_text[i])
+
+        time.sleep(n)
+        #output.clear()
+        # Clean screen
+        pygame.draw.rect(screen, (0,0,0), pygame.Rect(0,0,WIDTH,HEIGHT) )
+        # Draw Map
+        coord_text = draw_map()
+        for i in range(len(coord_text)):
+            message_display(_CITIES[i][0], coord_text[i])
+
+
+    # END FONCTIONS DECLARATION
+
+    while not done:
+            for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                            done = True
+            
+            # Clean screen
+            pygame.draw.rect(screen, (0,0,0), pygame.Rect(0,0,WIDTH,HEIGHT) )
+            # Draw Map
+            draw_map()
+            
+            #SMA ALGO FOR ANTS
+            pheromones_map = Map()
+            print(pheromones_map.adj_mat)
+            f = Fourmi(_CITIES[0])
+            
+            #ALGO
+            n_fourmis = 3
+            fourmis= [Fourmi(_CITIES[random.randint(0,_NODES-1)]) for i in range(n_fourmis)]
+            colors = [(200+i*55.0/n_fourmis,200+i*55.0/n_fourmis,200+i*55/n_fourmis) for i in range(len(fourmis))]
+            for turn in range(_NODES+1):
+                message_display(f"Turn {turn}", (350,350))
+                for i in range(len(fourmis)):
+                    f=fourmis[i]
+                    f.move(
+                        f.choose_movement(pheromones_map), 
+                        pheromones_map
+                    )
+                    #GUI ANT
+                    x_ant,y_ant = f.coord_to_display(350, mean_x,mean_y,std_x,std_y)
+                    pygame.draw.circle(screen,colors[i],   (x_ant+8,y_ant+8),8,0)
+                    #pygame.draw.rect(screen, colors[i], pygame.Rect(x_ant, y_ant, 18, 18))
+                display_and_clear(3)
+
+            display_and_clear(1, True)
+            done=True
+            
+            pheromones_map.print_results()
+            print(__circuit__)
