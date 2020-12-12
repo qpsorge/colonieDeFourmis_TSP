@@ -18,7 +18,7 @@ class Fourmi:
         '''
         self.pos = position if position is not None else None
         self.cities = [position]
-        self.quality = 5
+        self.quality = 3
         self.prenom = Fourmi.__prenoms__[random.randint(0,len(Fourmi.__prenoms__)-1)]
         self.size = random.randint(5,10)
         self.color = tuple([100+30*random.randint(0,4) for i in range(3)])
@@ -95,5 +95,5 @@ class Fourmi:
     def __str__(self):
         print(f"Agent secret {self.prenom} au rapport")
         print(f"\tPosition actuelle : {self.pos[0]}")
-        print(f"\tVilles visitées : {[x[0] for x in self.cities]}")
+        print(f"\tVilles visitées :\n{[x[0] for x in self.cities]}")
         return ""
